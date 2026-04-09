@@ -1,0 +1,76 @@
+"""
+Homework 1
+Data Science for Lawyers
+Topic: Python Basics
+"""
+
+# ==================== TASK 1 ====================
+print("=== Task 1 ===")
+
+integer_var = 42
+float_var = 3.14
+string_var = "Hello, world!"
+boolean_var = True
+
+print("Integer:", integer_var)
+print("Float:", float_var)
+print("String:", string_var)
+print("Boolean:", boolean_var)
+
+user_name = input("Enter your name: ")
+user_age = input("Enter your age: ")
+user_city = input("Enter your city: ")
+
+print("\nEntered data:")
+print("Name:", user_name)
+print("Age:", user_age)
+print("City:", user_city)
+
+print("\nObserving id():")
+a = 10
+b = 10
+print(f"id(a) = {id(a)}, id(b) = {id(b)}")
+
+c = [1, 2, 3]
+d = [1, 2, 3]
+print(f"id(c) = {id(c)}, id(d) = {id(d)}")
+
+print(f"id(c) before change: {id(c)}")
+c.append(4)
+print(f"id(c) after change: {id(c)}")
+
+print("\n" + "="*50 + "\n")
+
+# ==================== TASK 2 ====================
+print("=== Task 2 ===")
+seconds_input = input("Enter time in seconds (integer): ")
+
+if seconds_input.isdigit():
+    total_seconds = int(seconds_input)
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+
+    print(f"Hours: {hours}")
+    print(f"Minutes: {minutes}")
+    print(f"Seconds: {seconds}")
+else:
+    print("Error: enter a non-negative integer!")
+
+print("\n" + "="*50 + "\n")
+
+# ==================== TASK 3 ====================
+print("=== Task 3 ===")
+n_str = input("Enter a number from 1 to 9: ")
+
+if n_str.isdigit() and len(n_str) == 1:
+    n = int(n_str)
+    if 1 <= n <= 9:
+        nn = int(str(n) * 2)
+        nnn = int(str(n) * 3)
+        result = n + nn + nnn
+        print(f"{n} + {nn} + {nnn} = {result}")
+    else:
+        print("Number must be between 1 and 9!")
+else:
+    print("Error: enter a single digit from 1 to 9!")
