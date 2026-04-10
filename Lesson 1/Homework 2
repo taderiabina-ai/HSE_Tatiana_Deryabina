@@ -1,0 +1,38 @@
+"""
+Homework 2 (optional)
+Data Science for Lawyers
+Topic: Python Basics - Data structure "Dispute Participants"
+"""
+
+# ==================== TASK: DISPUTE PARTICIPANTS ====================
+print("=== Dispute Participants Data Entry ===\n")
+
+# Create an empty list for participants
+participants = []
+
+# We will enter data for 3 participants
+for i in range(1, 4):
+    print(f"--- Participant {i} ---")
+    name = input("Enter name (e.g., 'LLC Horns and Hooves'): ")
+    status = input("Enter status (e.g., Plaintiff, Defendant, Third party): ")
+    inn = input("Enter INN (tax number): ")
+    
+    # Create a dictionary for this participant
+    participant = {
+        "name": name,
+        "status": status,
+        "inn": inn
+    }
+    
+    # Add to the list
+    participants.append(participant)
+    print()  # empty line for readability
+
+# Output the resulting data structure
+print("\n=== Resulting data structure ===")
+print(participants)
+
+# Optional: pretty print
+print("\n=== Pretty formatted output ===")
+for idx, p in enumerate(participants, 1):
+    print(f"Participant {idx}: name={p['name']}, status={p['status']}, inn={p['inn']}")
