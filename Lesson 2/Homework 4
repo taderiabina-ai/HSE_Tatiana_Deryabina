@@ -1,1 +1,163 @@
+"""
+Домашнее задание 4. Валидация ИНН
+Дисциплина: «Наука о данных для юристов»
+Алгоритм проверки: https://www.kholenkov.ru/data-validation/inn/
+"""
 
+
+def _calculate_control_digit(digits: str, weights: list) -> int:
+    """
+    Вспомогательная функция: вычисляет контрольное число по заданным весам.
+    
+    Args:
+        digits: строка с цифрами ИНН
+        weights: список весовых коэффициентов
+        
+    Returns:
+        int: контрольное число (0-9)
+    """
+    total = sum(int(d) * w for d, w in zip(digits, weights))
+    control = total % 11
+    return control % 10 if control > 9 else control
+
+
+def validate_inn_10(inn: str) -> bool:
+    """
+    Проверяет корректность ИНН организации (10 цифр).
+    
+    Алгоритм:
+    1. Сумма произведений цифр 1-9 на веса [2,4,10,3,5,9,4,6,8]
+    2. Контрольное число = сумма % 11 (если >9, то ещё %10)
+    3. Сравнение с 10-й цифрой ИНН
+    
+    Args:
+        inn: строка из 10 цифр
+        
+    Returns:
+        bool: True если ИНН валиден
+    """
+    if len(inn) != 10 or not inn.isdigit():
+        return False
+    
+    weights = [2, 4, 10, 3, 5, 9, 4, 6, 8]
+    expected = _calculate_control_digit(inn[:9], weights)
+    actual = int(inn[9])
+    
+    return expected == actual
+
+
+def validate_inn_12(inn: str) -> bool:
+    """
+    Проверяет корректность ИНН физического лица/ИП (12 цифр).
+    
+    Алгоритм:
+    1. Первое контрольное число: сумма цифр 1-10 × веса [7,2,4,10,3,5,9,4,6,8]
+    2. Второе контрольное число: сумма цифр 1-11 × веса [3,7,2,4,10,3,5,9,4,6,8]
+    3. Оба контрольных числа сравниваются с 11-й и 12-й цифрами соответственно
+    
+    Args:
+        inn: строка из 12 цифр
+        
+    Returns:
+        bool: True если ИНН валиден
+    """
+    if len(inn) != 12 or not inn.isdigit():
+        return False
+    
+    # Первое контрольное число (сравнение с 11-й цифрой)
+    weights1 = [7, 2, 4, 10, 3, 5, 9, 4, 6, 8]
+    expected1 = _calculate_control_digit(inn[:10], weights1)
+    actual1 = int(inn[10])
+    
+    if expected1 != actual1:
+        return False
+    
+    # Второе контрольное число (сравнение с 12-й цифрой)
+    weights2 = [3, 7, 2, 4, 10, 3, 5, 9, 4, 6, 8]
+    expected2 = _calculate_control_digit(inn[:11], weights2)
+    actual2 = int(inn[11])
+    
+    return expected2 == actual2
+
+
+def validate_inn(inn: str) -> bool:
+    """
+    Основная функция валидации ИНН.
+    
+    Автоматически определяет тип ИНН по длине и применяет соответствующий алгоритм.
+    
+    Args:
+        inn: строка, содержащая ИНН (10 или 12 цифр)
+        
+    Returns:
+        bool: True если ИНН прошёл проверку, False иначе
+        
+    Examples:
+        >>> validate_inn("7707083893")  # ИНН организации
+        True
+        >>> validate_inn("500100732259")  # ИНН физического лица
+        True
+        >>> validate_inn("1234567890")  # Некорректный ИНН
+        False
+    """
+    # Очистка входных данных: удаляем пробелы и дефисы
+    inn_clean = str(inn).strip().replace(" ", "").replace("-", "")
+    
+    if len(inn_clean) == 10:
+        return validate_inn_10(inn_clean)
+    elif len(inn_clean) == 12:
+        return validate_inn_12(inn_clean)
+    else:
+        return False
+
+
+# =============================================================================
+# Тестирование функций
+# =============================================================================
+if __name__ == "__main__":
+    print("🔹 Тестирование валидации ИНН:\n")
+    
+    # Тестовые данные (реальные валидные ИНН из открытых источников)
+    test_cases = [
+        # (ИНН, ожидаемый результат, описание)
+        ("7707083893", True, "ПАО «Сбербанк» (организация)"),
+        ("7736207543", True, "ООО «Яндекс» (организация)"),
+        ("500100732259", True, "Физическое лицо (12 знаков)"),
+        ("7710140679", True, "ООО «Газпром» (организация)"),
+        ("1234567890", False, "Некорректная контрольная сумма"),
+        ("12345", False, "Слишком короткая строка"),
+        ("770708389", False, "9 цифр вместо 10"),
+        ("77070838931", False, "11 цифр — некорректная длина"),
+        ("770708389а", False, "Содержит буквы"),
+        ("", False, "Пустая строка"),
+    ]
+    
+    passed = 0
+    for inn, expected, description in test_cases:
+        result = validate_inn(inn)
+        status = "✅" if result == expected else "❌"
+        if result == expected:
+            passed += 1
+        print(f"{status} ИНН '{inn}' → {result} | {description}")
+    
+    print(f"\n📊 Пройдено тестов: {passed}/{len(test_cases)}")
+    
+    # Интерактивная проверка
+    print("\n" + "="*60)
+    print("🔍 Интерактивная проверка (введите ИНН или 'exit' для выхода):")
+    print("="*60)
+    
+    while True:
+        user_input = input("\nВведите ИНН: ").strip()
+        if user_input.lower() in ('exit', 'quit', 'выход'):
+            break
+        if not user_input:
+            continue
+            
+        result = validate_inn(user_input)
+        inn_type = (
+            "организации (10 знаков)" if len(user_input.replace(" ", "").replace("-", "")) == 10 
+            else "физ. лица/ИП (12 знаков)" if len(user_input.replace(" ", "").replace("-", "")) == 12
+            else "некорректная длина"
+        )
+        print(f"Результат: {'✅ Валидный' if result else '❌ Невалидный'} ИНН {inn_type}")
