@@ -1,1 +1,134 @@
+"""
+Домашнее задание 3. Введение в Python
+Дисциплина: «Наука о данных для юристов»
+"""
 
+# Импорт данных из предоставленного файла
+# Убедитесь, что lesson_2_data.py находится в той же папке или в sys.path
+try:
+    from lesson_2_data import courts, respondents
+except ImportError:
+    print("Ошибка: файл lesson_2_data.py не найден. Пожалуйста, поместите его в ту же директорию.")
+    courts = {}
+    respondents = []
+
+# =============================================================================
+# 1. Математические функции
+# =============================================================================
+
+def factorial(n: int) -> int:
+    """Вычисляет факториал числа n (произведение натуральных чисел от 1 до n)."""
+    if n < 0:
+        raise ValueError("Факториал не определён для отрицательных чисел")
+    result = 1
+    for i in range(2, n + 1):
+        result *= i
+    return result
+
+
+def find_max_of_three(numbers: tuple) -> float:
+    """Находит наибольшее число из трёх переданных в кортеже."""
+    if len(numbers) != 3:
+        raise ValueError("Функция ожидает кортеж ровно из трёх чисел")
+    return max(numbers)
+
+
+def right_triangle_area(leg1: float, leg2: float) -> float:
+    """Рассчитывает площадь прямоугольного треугольника по двум катетам."""
+    if leg1 <= 0 or leg2 <= 0:
+        raise ValueError("Длины катетов должны быть положительными")
+    return 0.5 * leg1 * leg2
+
+
+# =============================================================================
+# 2. Функция генерации шапки процессуального документа
+# =============================================================================
+
+# Данные истца (замените на свои реальные данные перед сдачей)
+PLAINTIFF_DATA = {
+    "name": "Пупкин Василий Геннадьевич",
+    "inn": "1236182357",
+    "ogrnip": "218431927812733",
+    "address": "123534, г. Москва, ул. Водников, 13"
+}
+
+
+def generate_court_header(defendant: dict, case_number: str) -> str:
+    """
+    Генерирует шапку процессуального документа.
+    
+    Args:
+        defendant: словарь с данными ответчика
+        case_number: номер дела (например, 'А40-123456/2023')
+        
+    Returns:
+        Готовая шапка в виде строки
+    """
+    # Извлекаем код суда до первого дефиса
+    court_code = case_number.split("-")[0]
+    
+    # Получаем данные суда из справочника
+    court_info = courts.get(court_code)
+    if not court_info:
+        return f"⚠️ Суд с кодом {court_code} не найден в справочнике."
+        
+    court_name = court_info["court_name"]
+    court_address = court_info["court_address"]
+    
+    # Извлекаем данные ответчика с безопасным получением значений
+    def_name = defendant.get("short_name", defendant.get("full_name", "Не указано"))
+    def_inn = defendant.get("inn", "Не указан")
+    def_ogrn = defendant.get("ogrn", "Не указан")
+    def_address = defendant.get("address", "Не указан")
+    
+    # Формируем шапку с помощью f-string в точности по шаблону
+    header = (
+        f"В {court_name}\n"
+        f"Адрес: {court_address}\n"
+        f"Истец: {PLAINTIFF_DATA['name']} ИНН {PLAINTIFF_DATA['inn']} "
+        f"ОГРНИП {PLAINTIFF_DATA['ogrnip']} Адрес: {PLAINTIFF_DATA['address']}\n"
+        f"Ответчик: {def_name} ИНН {def_inn} ОГРН {def_ogrn} "
+        f"Адрес: {def_address}\n"
+        f"Номер дела {case_number}"
+    )
+    return header
+
+
+# =============================================================================
+# 3. Функция массовой генерации шапок
+# =============================================================================
+
+def generate_multiple_headers(respondents_list: list) -> None:
+    """
+    Принимает список словарей с данными ответчиков.
+    Использует цикл for для генерации и вывода всех шапок в консоль.
+    """
+    for idx, respondent in enumerate(respondents_list, start=1):
+        case_num = respondent.get("case_number")
+        if case_num:
+            print(f"--- Документ #{idx} ---")
+            print(generate_court_header(respondent, case_num))
+            print("\n" + "=" * 60 + "\n")
+
+
+# =============================================================================
+# Запуск и тестирование
+# =============================================================================
+if __name__ == "__main__":
+    print("🔹 Тест математических функций:")
+    print(f"factorial(5) = {factorial(5)}")
+    print(f"find_max_of_three((10, 45, 23)) = {find_max_of_three((10, 45, 23))}")
+    print(f"right_triangle_area(6, 8) = {right_triangle_area(6, 8)}\n")
+    
+    print("🔹 Тест генерации одной шапки:")
+    test_defendant = {
+        "short_name": 'ООО "Кооператив Озеро"',
+        "inn": "1231231231",
+        "ogrn": "123124129312941",
+        "address": "123534, г. Москва, ул. Красивых молдавских партизан, 69"
+    }
+    print(generate_court_header(test_defendant, "А40-123456/2023"))
+    print("\n" + "=" * 60 + "\n")
+    
+    print("🔹 Тест массовой генерации (первые 5 записей из файла):")
+    generate_multiple_headers(respondents[:5])
